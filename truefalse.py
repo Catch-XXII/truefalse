@@ -1,5 +1,6 @@
+from const import RE_EMAIL, RE_PHONE
+from player import Player
 from colorama import Fore
-from Player import Player
 import datetime
 import sqlite3
 import os.path
@@ -11,7 +12,7 @@ import re
 def is_valid_email() -> str:
     while True:
         email = input('Enter your email: ')
-        match = re.match(r'^[a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', email)
+        match = re.match(RE_EMAIL, email)
         if match is None:
             print('Not a valid E-mail address')
         else:
@@ -21,7 +22,7 @@ def is_valid_email() -> str:
 def is_valid_phone() -> str:
     while True:
         phone = input("Enter your phone number: ")
-        match = re.match(r'^([0-9]( |-)?)?(\(?[0-9]{3}\)?|[0-9]{3})( |-)?([0-9]{3}( |-)?[0-9]{4}|[a-zA-Z0-9]{7})$',
+        match = re.match(RE_PHONE,
                          phone)
         if match is None:
             print('Not a valid phone number')
@@ -99,13 +100,13 @@ try:
     connection = sqlite3.connect('game_results.db')
     cursor = connection.cursor()
 
-    # cursor.execute('''create table player(id integer primary key, 
-    # name text not null, 
-    # email text unique not null, 
-    # age integer not null, 
-    # phone text unique not null, 
+    # cursor.execute('''create table player(id integer primary key,
+    # name text not null,
+    # email text unique not null,
+    # age integer not null,
+    # phone text unique not null,
     # score integer not null,
-    # duration real not null, 
+    # duration real not null,
     # date datetime not null);''')
 
     cursor.execute('insert into player (name, email, age, phone, score, duration, date) values(?, ?, ?, ?, ?, ?, ?)',
