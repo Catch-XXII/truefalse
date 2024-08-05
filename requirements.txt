@@ -1,1 +1,2 @@
 colorama
+isort[requirements_deprecated_finder,pipfile_deprecated_finder]

@@ -2,10 +2,10 @@ from colorama import Fore
 from Player import Player
 import datetime
 import sqlite3
+import os.path
 import random
 import time
 import re
-import os.path
 
 
 def is_valid_email() -> str:
@@ -86,8 +86,8 @@ if player.score == 45:
 
 else:
     print(
-        Fore.RED + "Sorry :( " + player.name + " you could not reach the maximum score" + " Focus (■_■¬) !!!" + "\nYour Score is: " + str(
-            player.score))
+        Fore.RED + "Sorry :( " + player.name + " you could not reach the maximum score" + " Focus (■_■¬) !!!" +
+        "\nYour Score is: " + str(player.score))
     level -= 1
 end = time.time()  # game ends here
 hours, rem = divmod(end - start, 3600)
@@ -96,7 +96,7 @@ elapsed_time = end - start
 print("This round was completed in: " + "{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
 try:
 
-    connection = sqlite3.connect('playerdb.db')
+    connection = sqlite3.connect('game_results.db')
     cursor = connection.cursor()
 
     # cursor.execute('''create table player(id integer primary key, 
