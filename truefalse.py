@@ -17,10 +17,12 @@ def is_valid_email() -> str:
         else:
             return email
 
+
 def is_valid_phone() -> str:
-     while True:
+    while True:
         phone = input("Enter your phone number: ")
-        match = re.match(r'^([0-9]( |-)?)?(\(?[0-9]{3}\)?|[0-9]{3})( |-)?([0-9]{3}( |-)?[0-9]{4}|[a-zA-Z0-9]{7})$', phone)
+        match = re.match(r'^([0-9]( |-)?)?(\(?[0-9]{3}\)?|[0-9]{3})( |-)?([0-9]{3}( |-)?[0-9]{4}|[a-zA-Z0-9]{7})$',
+                         phone)
         if match is None:
             print('Not a valid phone number')
         else:
@@ -35,11 +37,11 @@ def create() -> Player:
             print(line, end='')
             time.sleep(0.00125)
         time.sleep(1)
-    
+
     ask = "\n\nEnter your name: "
-    
-    for letter in ask: 
-        print(letter, end="") 
+
+    for letter in ask:
+        print(letter, end="")
         time.sleep(0.25)
 
     name = input("").title()
@@ -78,19 +80,22 @@ while i < level:
         player.score -= 5
         print(f"Wrong :( {alert}{player.score}")
 if player.score == 45:
-    print(Fore.GREEN + "Well Done !!! " + player.name + " You have reached the next level" + "\nYour Score is: " + str(player.score))
+    print(Fore.GREEN + "Well Done !!! " + player.name + " You have reached the next level" + "\nYour Score is: " + str(
+        player.score))
     level += 1
 
 else:
-    print(Fore.RED + "Sorry :( " + player.name + " you could not reach the maximum score" + " Focus (■_■¬) !!!" + "\nYour Score is: " + str(player.score))
+    print(
+        Fore.RED + "Sorry :( " + player.name + " you could not reach the maximum score" + " Focus (■_■¬) !!!" + "\nYour Score is: " + str(
+            player.score))
     level -= 1
 end = time.time()  # game ends here
-hours, rem = divmod(end-start, 3600)
+hours, rem = divmod(end - start, 3600)
 minutes, seconds = divmod(rem, 60)
 elapsed_time = end - start
 print("This round was completed in: " + "{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
 try:
-    
+
     connection = sqlite3.connect('playerdb.db')
     cursor = connection.cursor()
 
@@ -102,25 +107,29 @@ try:
     # score integer not null,
     # duration real not null, 
     # date datetime not null);''')
-    
-    cursor.execute('insert into player (name, email, age, phone, score, duration, date) values(?, ?, ?, ?, ?, ?, ?)', (player.name, 
-                                                                                                                       player.email, 
-                                                                                                                       player.age, 
-                                                                                                                       player.phone, 
-                                                                                                                       player.score, 
-                                                                                                                       elapsed_time, 
-                                                                                                                       player.date))
+
+    cursor.execute('insert into player (name, email, age, phone, score, duration, date) values(?, ?, ?, ?, ?, ?, ?)',
+                   (player.name,
+                    player.email,
+                    player.age,
+                    player.phone,
+                    player.score,
+                    elapsed_time,
+                    player.date))
 
     cursor.execute('select * from player order by duration asc')
     rows = cursor.fetchall()
-    print("{:-^4s}{:_^30s}{:@^30s}{:-^7s}{:#^12s}{:-^9s}{:*^12s}{:~^26s}".format('No', 'Name', 'E-mail', 'Age', 'Number', 'Score', 'Duration', 'Date'))
+    print(
+        "{:-^4s}{:_^30s}{:@^30s}{:-^7s}{:#^12s}{:-^9s}{:*^12s}{:~^26s}".format('No', 'Name', 'E-mail', 'Age', 'Number',
+                                                                               'Score', 'Duration', 'Date'))
     for row in rows:
-        print("{:^4d}{:<30s}{:<30s}{:^7d}{:<12s}{:^9d}{:^12.2f}{:^26s}".format(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]))
+        print("{:^4d}{:<30s}{:<30s}{:^7d}{:<12s}{:^9d}{:^12.2f}{:^26s}".format(row[0], row[1], row[2], row[3], row[4],
+                                                                               row[5], row[6], row[7]))
 
     connection.commit()
 
-except Exception as e: 
+except Exception as e:
     connection.rollback()
     raise e
-finally: 
+finally:
     connection.close()
