@@ -1,20 +1,25 @@
-from const import RE_EMAIL, RE_PHONE
+from const import RE_EMAIL, RE_PHONE, DB_NAME
+import datetime
 from player import Player
 from colorama import Fore
-import datetime
-import sqlite3
 import os.path
 import random
 import time
 import re
+from db_operations import (
+    create_sqlite_database,
+    create_table,
+    insert_into_table,
+    fetch_score_board,
+)
 
 
 def is_valid_email() -> str:
     while True:
-        email = input('Enter your email: ')
+        email = input("Enter your email: ")
         match = re.match(RE_EMAIL, email)
         if match is None:
-            print('Not a valid E-mail address')
+            print("Not a valid E-mail address")
         else:
             return email
 
@@ -22,20 +27,19 @@ def is_valid_email() -> str:
 def is_valid_phone() -> str:
     while True:
         phone = input("Enter your phone number: ")
-        match = re.match(RE_PHONE,
-                         phone)
+        match = re.match(RE_PHONE, phone)
         if match is None:
-            print('Not a valid phone number')
+            print("Not a valid phone number")
         else:
             return phone
 
 
 def create() -> Player:
     score = 0
-    with open(os.path.join("intro.txt"), 'r') as file:
+    with open(os.path.join("intro.txt"), "r") as file:
         lines = file.read()
         for line in lines:
-            print(line, end='')
+            print(line, end="")
             time.sleep(0.00125)
         time.sleep(1)
 
@@ -51,13 +55,12 @@ def create() -> Player:
     phone = is_valid_phone()
     date = datetime.datetime.now()
     print(f"Hello {name.title()} DateTime: {date:%Y/%m/%d %H:%M:%S}")
-    player = Player(name, email, age, phone, score, date)
-    return player
+    return Player(name, email, age, phone, score, date)
 
 
 player = create()
 start = time.time()  # game starts here
-sign_list = ['<', '=', '>']
+sign_list = ["<", "=", ">"]
 alert = "Your score is: "
 level = 9
 i = 0
@@ -68,69 +71,55 @@ while i < level:
     print(f"{left}{sign}{right}")
     i += 1
     answer = input("True or False: ").upper()
-    if sign_list.index(sign) == 0 and (answer == "T" and left < right or answer == "F" and left > right):
+    if sign_list.index(sign) == 0 and (
+        answer == "T" and left < right or answer == "F" and left > right
+    ):
         player.score += 5
         print(f"Correct :) {alert}{player.score}")
-    elif sign_list.index(sign) == 1 and (answer == "T" and left == right or answer == "F" and left != right):
+    elif sign_list.index(sign) == 1 and (
+        answer == "T" and left == right or answer == "F" and left != right
+    ):
         player.score += 5
         print(f"Correct :) {alert}{player.score}")
-    elif sign_list.index(sign) == 2 and (answer == "T" and left > right or answer == "F" and left < right):
+    elif sign_list.index(sign) == 2 and (
+        answer == "T" and left > right or answer == "F" and left < right
+    ):
         player.score += 5
         print(f"Correct :) {alert}{player.score}")
     else:
         player.score -= 5
         print(f"Wrong :( {alert}{player.score}")
 if player.score == 45:
-    print(Fore.GREEN + "Well Done !!! " + player.name + " You have reached the next level" + "\nYour Score is: " + str(
-        player.score))
+    print(
+        Fore.GREEN
+        + "Well Done !!! "
+        + player.name
+        + " You have reached the next level"
+        + "\nYour Score is: "
+        + str(player.score)
+    )
     level += 1
 
 else:
     print(
-        Fore.RED + "Sorry :( " + player.name + " you could not reach the maximum score" + " Focus (■_■¬) !!!" +
-        "\nYour Score is: " + str(player.score))
+        Fore.RED
+        + "Sorry :( "
+        + player.name
+        + " you could not reach the maximum score"
+        + " Focus (■_■¬) !!!"
+        + "\nYour Score is: "
+        + str(player.score)
+    )
     level -= 1
 end = time.time()  # game ends here
 hours, rem = divmod(end - start, 3600)
 minutes, seconds = divmod(rem, 60)
-elapsed_time = end - start
-print("This round was completed in: " + "{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
-try:
+delta_time = end - start
+print(
+    "This round was completed in: "
+    + "{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds)
+)
 
-    connection = sqlite3.connect('game_results.db')
-    cursor = connection.cursor()
-
-    # cursor.execute('''create table player(id integer primary key,
-    # name text not null,
-    # email text unique not null,
-    # age integer not null,
-    # phone text unique not null,
-    # score integer not null,
-    # duration real not null,
-    # date datetime not null);''')
-
-    cursor.execute('insert into player (name, email, age, phone, score, duration, date) values(?, ?, ?, ?, ?, ?, ?)',
-                   (player.name,
-                    player.email,
-                    player.age,
-                    player.phone,
-                    player.score,
-                    elapsed_time,
-                    player.date))
-
-    cursor.execute('select * from player order by duration asc')
-    rows = cursor.fetchall()
-    print(
-        "{:-^4s}{:_^30s}{:@^30s}{:-^7s}{:#^12s}{:-^9s}{:*^12s}{:~^26s}".format('No', 'Name', 'E-mail', 'Age', 'Number',
-                                                                               'Score', 'Duration', 'Date'))
-    for row in rows:
-        print("{:^4d}{:<30s}{:<30s}{:^7d}{:<12s}{:^9d}{:^12.2f}{:^26s}".format(row[0], row[1], row[2], row[3], row[4],
-                                                                               row[5], row[6], row[7]))
-
-    connection.commit()
-
-except Exception as e:
-    connection.rollback()
-    raise e
-finally:
-    connection.close()
+conn = create_sqlite_database(DB_NAME)
+insert_into_table(conn, player, delta_time)
+fetch_score_board(conn)
