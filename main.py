@@ -154,6 +154,7 @@ class GameApp:
             age=player_data["age"],
             phone=player_data["phone"],
             date=player_data["date"],
+            id=player_data["id"],
         )
         print_success(f"Welcome back, {player.name}!")
         self.current_player = player
@@ -236,13 +237,19 @@ class GameApp:
         final_score = engine.get_score()
 
         result = GameResult(
-            player_id=0,  # Will be set when we implement user persistence
+            player_id=self.current_player.id,
             difficulty=difficulty_name,
             score=final_score,
             max_score=max_score,
             duration=duration,
             created_at=datetime.now(),
         )
+        
+        # Insert result into database
+        try:
+            self.result_repo.insert_game_result(result)
+        except Exception as e:
+            print_warning(f"Failed to save game result: {e}")
 
         self._show_game_summary(result, duration)
 
