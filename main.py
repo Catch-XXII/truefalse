@@ -113,11 +113,25 @@ class GameApp:
         phone = get_player_phone()
 
         try:
-            player = Player(name, email, age, phone)
+            # Insert player into database
+            player_id = self.player_repo.insert_player(
+                name=name,
+                email=email,
+                age=age,
+                phone=phone,
+                date=datetime.datetime.now(),
+            )
+            
+            # Create Player object with database ID
+            player = Player(name, email, age, phone, id=player_id)
             print_success(f"Welcome {name}! Profile created successfully.")
             self.current_player = player
         except ValueError as e:
             print_error(f"Invalid input: {e}")
+            if confirm_action("Try again?"):
+                self._create_new_player()
+        except Exception as e:
+            print_error(f"Error creating player: {e}")
             if confirm_action("Try again?"):
                 self._create_new_player()
 
