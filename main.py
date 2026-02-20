@@ -190,7 +190,8 @@ class GameApp:
         try:
             while not engine.is_game_finished():
                 current, total = engine.get_progress()
-                question_str = str(engine.get_current_question())
+                engine.prepare_round()  # Generate question for this round
+                question_str = engine.get_current_question()  # Get the prepared question
                 print_question(question_str, current + 1, total)
 
                 try:
