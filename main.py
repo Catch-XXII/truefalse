@@ -119,7 +119,7 @@ class GameApp:
                 email=email,
                 age=age,
                 phone=phone,
-                date=datetime.datetime.now(),
+                date=datetime.now(),
             )
             
             # Create Player object with database ID
