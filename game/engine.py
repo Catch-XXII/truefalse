@@ -1,9 +1,9 @@
 """Core game engine for managing game flow and scoring."""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from config import DifficultyLevel
-from game.question import generate_question
+from game.question import Question, generate_question
 
 if TYPE_CHECKING:
     from models.player import Player
@@ -24,6 +24,7 @@ class GameEngine:
         self.score = 0
         self.current_question_index = 0
         self.total_questions = difficulty.num_questions
+        self.current_question: Optional[Question] = None
 
     def play_round(self, user_answer: str) -> bool:
         """Play a single round of the game.
@@ -36,14 +37,17 @@ class GameEngine:
 
         Raises:
             ValueError: If user_answer is not valid
+            RuntimeError: If no question has been prepared
         """
         if self.current_question_index >= self.total_questions:
             raise RuntimeError("Game already finished")
 
-        question = generate_question()
+        if self.current_question is None:
+            raise RuntimeError("No question prepared for this round. Call prepare_round() first.")
+
         answer_bool = self._parse_answer(user_answer)
 
-        is_correct = question.is_correct(answer_bool)
+        is_correct = self.current_question.is_correct(answer_bool)
 
         if is_correct:
             self.score += self.difficulty.score_per_correct
@@ -51,6 +55,7 @@ class GameEngine:
             self.score = max(0, self.score - self.difficulty.score_penalty)
 
         self.current_question_index += 1
+        self.current_question = None  # Clear question after round completes
         return is_correct
 
     def get_current_question(self) -> str:
@@ -58,8 +63,13 @@ class GameEngine:
 
         Returns:
             The question string (e.g., "45<67")
+
+        Raises:
+            RuntimeError: If no question has been prepared
         """
-        return str(generate_question())
+        if self.current_question is None:
+            raise RuntimeError("No question prepared for this round. Call prepare_round() first.")
+        return str(self.current_question)
 
     def get_score(self) -> int:
         """Get the current score.
@@ -92,6 +102,13 @@ class GameEngine:
             Tuple of (current_question_index, total_questions)
         """
         return (self.current_question_index, self.total_questions)
+
+    def prepare_round(self) -> None:
+        """Generate and prepare the question for this round.
+
+        Must be called before get_current_question() or play_round().
+        """
+        self.current_question = generate_question()
 
     @staticmethod
     def _parse_answer(answer: str) -> bool:
