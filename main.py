@@ -182,6 +182,7 @@ class GameApp:
                 self.current_player = None
                 return
             else:  # Exit
+                self.current_player = None
                 return
 
     def _play_game(self) -> None:
